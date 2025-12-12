@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { UserPost } from "../../types/userPost";
 import ShareModal from "../../model/ShareModal";
-import { addReplyAPI, votePollAPI } from "../../api/post";
+import { votePollAPI } from "../../api/post";
 import { getUser } from "../../utils/userStorage";
 import { useNavigate } from "react-router-dom";
 import EditPostModal from "../../model/EditPostModal";
@@ -37,8 +37,6 @@ const Post: React.FC<PostProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
   const tagInputRef = useRef<HTMLInputElement>(null);
-
-  const [replyText, setReplyText] = useState("");
 
   const currentUser: any = getUser();
 

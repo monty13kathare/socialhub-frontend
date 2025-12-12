@@ -13,7 +13,6 @@ interface CommentFormProps {
 }
 
 const CommentForm: React.FC<CommentFormProps> = ({
-  onSubmit,
   placeholder = "Add a comment...",
   buttonText = "Comment",
   onCancel,

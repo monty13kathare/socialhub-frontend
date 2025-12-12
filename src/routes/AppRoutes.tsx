@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
 import PrivateRoute from "./PrivateRoute";
 
-import DetailPage from "../pages/DetailPage";
 import MessagePage from "../pages/MessagePage";
 import ExplorePage from "../pages/ExplorePage";
 import ChatTest from "../pages/ChatText";
@@ -24,7 +23,6 @@ export default function AppRoutes() {
       {/* 🟩 Protected Routes */}
       <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
         <Route index element={<HomeFeed />} />
-        <Route path="post/:postId" element={<DetailPage />} />
         <Route path="profile" element={<Profile />} />
         <Route path="user/:id" element={<UserProfile />} />
         <Route path="settings" element={<SettingsPage />} />

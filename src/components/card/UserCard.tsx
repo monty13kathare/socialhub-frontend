@@ -105,7 +105,7 @@ export default function UserCard({ user }: UserCardProps) {
           <button
             onClick={handleFollow}
             disabled={isLoading}
-            className={`ml-auto px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 min-w-[80px] sm:min-w-[90px] flex items-center justify-center ${
+            className={`ml-auto px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 min-w-20 sm:min-w-[90px] flex items-center justify-center ${
               isLoading
                 ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
                 : isFollowing

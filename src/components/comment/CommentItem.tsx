@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import { formatTimeAgo } from "../../utils/helper";
 import CommentForm from "./CommentForm";
 import { addReply, deleteComment, likeComment } from "../../api/userPost";
-import { ChevronDown, ChevronUp, CircleChevronDown, CircleChevronUp, Heart, Reply, X } from "lucide-react";
+import {
+  CircleChevronDown,
+  CircleChevronUp,
+  Heart,
+  Reply,
+  X,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -24,7 +30,6 @@ const CommentItem: React.FC<CommentItemProps> = ({
     comment?.likes?.includes(currentUserId)
   );
   const [likeCount, setLikeCount] = useState(comment?.likes?.length || 0);
-
 
   // 🔥 API IMPORTS
   // -------------------------------
@@ -56,7 +61,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const handleDeleteComment = async () => {
     try {
       await deleteComment(postId, comment?._id);
-       toast.success("Comment deleted successfully!");
+      toast.success("Comment deleted successfully!");
       // await onRefresh();
     } catch (error) {
       console.error("Error deleting comment:", error);
@@ -80,7 +85,9 @@ const CommentItem: React.FC<CommentItemProps> = ({
             {/* USER INFO */}
             <div>
               <div className="flex items-center space-x-2">
-                <h4 className="text-white text-sm sm:text-base font-medium sm:font-semibold">{comment.user.name}</h4>
+                <h4 className="text-white text-sm sm:text-base font-medium sm:font-semibold">
+                  {comment.user.name}
+                </h4>
                 {/* <span className="text-slate-400 text-sm">@{comment.user.username}</span> */}
               </div>
 
@@ -107,13 +114,16 @@ const CommentItem: React.FC<CommentItemProps> = ({
           <div className="flex items-center space-x-6 mt-3">
             {/* LIKE */}
 
-
             <button
               onClick={handleLike}
-              className={`flex items-center space-x-2 ${isLiked ? "text-red-500" : "text-slate-400 hover:text-red-500"
-                }`}
+              className={`flex items-center space-x-2 ${
+                isLiked ? "text-red-500" : "text-slate-400 hover:text-red-500"
+              }`}
             >
-              <Heart size={16} className={isLiked ? "fill-red-500 text-red-500" : ""} />
+              <Heart
+                size={16}
+                className={isLiked ? "fill-red-500 text-red-500" : ""}
+              />
               <span className="text-sm">{likeCount}</span>
             </button>
 
@@ -132,7 +142,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
                 onClick={() => setShowReplies(!showReplies)}
                 className="text-slate-400 hover:text-purple-400 text-sm flex items-center space-x-1"
               >
-                {showReplies ? <CircleChevronDown size={16} /> : <CircleChevronUp size={16} />}
+                {showReplies ? (
+                  <CircleChevronDown size={16} />
+                ) : (
+                  <CircleChevronUp size={16} />
+                )}
                 <span>
                   {comment.replies.length}{" "}
                   {comment.replies.length === 1 ? "reply" : "replies"}

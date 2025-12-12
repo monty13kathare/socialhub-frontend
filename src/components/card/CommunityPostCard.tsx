@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  Bookmark, 
+import React, { useState } from "react";
+import {
+  Heart,
+  MessageCircle,
+  Share2,
+  Bookmark,
   MoreVertical,
   Award,
   Code,
@@ -14,13 +14,11 @@ import {
   Check,
   Globe,
   Lock,
-  Users,
   Clock,
   Zap,
-  TrendingUp,
-  ExternalLink
-} from 'lucide-react';
-import { formatTimeAgo } from '../../utils/helper';
+  ExternalLink,
+} from "lucide-react";
+import { formatTimeAgo } from "../../utils/helper";
 
 interface CommunityPostCardProps {
   post: any;
@@ -41,33 +39,53 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
   onShare,
   onBookmark,
   onVote,
-  onFollow
+  onFollow,
 }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
 
   // Post type configurations
-  const postTypeConfig:any = {
-    text: { icon: FileText, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-    image: { icon: ImageIcon, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    code: { icon: Code, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-    poll: { icon: BarChart3, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-    achievement: { icon: Award, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-    link: { icon: ExternalLink, color: 'text-cyan-400', bg: 'bg-cyan-500/10' }
+  const postTypeConfig: any = {
+    text: { icon: FileText, color: "text-blue-400", bg: "bg-blue-500/10" },
+    image: {
+      icon: ImageIcon,
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+    },
+    code: { icon: Code, color: "text-purple-400", bg: "bg-purple-500/10" },
+    poll: { icon: BarChart3, color: "text-amber-400", bg: "bg-amber-500/10" },
+    achievement: {
+      icon: Award,
+      color: "text-yellow-400",
+      bg: "bg-yellow-500/10",
+    },
+    link: { icon: ExternalLink, color: "text-cyan-400", bg: "bg-cyan-500/10" },
   };
 
   // Role configurations
   const roleConfig = {
-    admin: { label: 'Admin', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
-    moderator: { label: 'Mod', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
-    creator: { label: 'Creator', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-    member: { label: 'Member', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' }
+    admin: {
+      label: "Admin",
+      color: "bg-red-500/20 text-red-400 border-red-500/30",
+    },
+    moderator: {
+      label: "Mod",
+      color: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+    },
+    creator: {
+      label: "Creator",
+      color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    },
+    member: {
+      label: "Member",
+      color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    },
   };
 
   // Format time
-//   const formatTime = (dateString: string) => {
-//     return formatDistanceToNow(new Date(dateString), { addSuffix: true });
-//   };
+  //   const formatTime = (dateString: string) => {
+  //     return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  //   };
 
   // Handle code copy
   const handleCopyCode = async () => {
@@ -80,11 +98,19 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
 
   // Render post type badge
   const PostTypeBadge = () => {
-    const { icon: Icon, color, bg } = postTypeConfig[post?.type] || postTypeConfig.text;
+    const {
+      icon: Icon,
+      color,
+      bg,
+    } = postTypeConfig[post?.type] || postTypeConfig.text;
     return (
-      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${bg} border border-transparent`}>
+      <div
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${bg} border border-transparent`}
+      >
         <Icon size={14} className={color} />
-        <span className={`text-xs font-medium ${color} capitalize`}>{post.type}</span>
+        <span className={`text-xs font-medium ${color} capitalize`}>
+          {post.type}
+        </span>
       </div>
     );
   };
@@ -92,16 +118,22 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
   // Render community badge
   const CommunityBadge = () => (
     <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 rounded-lg border border-slate-700/50">
-      <div className="w-6 h-6 rounded-md overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500">
+      <div className="w-6 h-6 rounded-md overflow-hidden bg-linear-to-br from-purple-500 to-pink-500">
         {post.community.avatar ? (
-          <img src={post.community.avatar} alt={post.community.name} className="w-full h-full object-cover" />
+          <img
+            src={post.community.avatar}
+            alt={post.community.name}
+            className="w-full h-full object-cover"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">
             {/* {post.community.name.charAt(0)} */}
           </div>
         )}
       </div>
-      <span className="text-sm font-medium text-white">{post.community.name}</span>
+      <span className="text-sm font-medium text-white">
+        {post.community.name}
+      </span>
       {post.community.isPrivate ? (
         <Lock size={12} className="text-slate-400" />
       ) : (
@@ -112,8 +144,9 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
 
   // Render author role badge
   const RoleBadge = () => {
-    const role = isAdmin ? "admin" : 'member';
-    const { label, color } = roleConfig[role as keyof typeof roleConfig] || roleConfig.member;
+    const role = isAdmin ? "admin" : "member";
+    const { label, color } =
+      roleConfig[role as keyof typeof roleConfig] || roleConfig.member;
     return (
       <span className={`px-2 py-0.5 text-xs rounded-md border ${color}`}>
         {label}
@@ -126,10 +159,23 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
       {/* Featured/Pinned Indicator */}
       {(post.isPinned || post.isFeatured) && (
         <div className="absolute -top-3 -left-3 z-10">
-          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${post.isPinned ? 'bg-amber-500/20 border border-amber-500/30' : 'bg-purple-500/20 border border-purple-500/30'}`}>
-            <Zap size={12} className={post.isPinned ? 'text-amber-400' : 'text-purple-400'} />
-            <span className={`text-xs font-medium ${post.isPinned ? 'text-amber-400' : 'text-purple-400'}`}>
-              {post.isPinned ? '📌 Pinned' : '✨ Featured'}
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${
+              post.isPinned
+                ? "bg-amber-500/20 border border-amber-500/30"
+                : "bg-purple-500/20 border border-purple-500/30"
+            }`}
+          >
+            <Zap
+              size={12}
+              className={post.isPinned ? "text-amber-400" : "text-purple-400"}
+            />
+            <span
+              className={`text-xs font-medium ${
+                post.isPinned ? "text-amber-400" : "text-purple-400"
+              }`}
+            >
+              {post.isPinned ? "📌 Pinned" : "✨ Featured"}
             </span>
           </div>
         </div>
@@ -142,7 +188,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
           <div className="flex items-start gap-3 flex-1">
             {/* Author Avatar */}
             <div className="relative">
-              <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-500">
+              <div className="w-12 h-12 rounded-xl overflow-hidden bg-linear-to-br from-cyan-500 to-blue-500">
                 <img
                   src={post.author.avatar}
                   alt={post.author.name}
@@ -151,8 +197,16 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
               </div>
               {post.author.isVerified && (
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full border-2 border-slate-800 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <svg
+                    className="w-3 h-3 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
               )}
@@ -227,7 +281,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
-              {post.tags.map((tag:any, index:any) => (
+              {post.tags.map((tag: any, index: any) => (
                 <span
                   key={index}
                   className="px-3 py-1 bg-slate-700/50 text-slate-300 text-xs rounded-full border border-slate-600/50 hover:border-purple-500/50 transition-colors cursor-pointer"
@@ -243,7 +297,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
             <div className="rounded-xl overflow-hidden mb-4 border border-slate-700/50">
               <img
                 src={post.image.url}
-                alt={post.image.alt || 'Post image'}
+                alt={post.image.alt || "Post image"}
                 className="w-full h-auto max-h-96 object-cover cursor-pointer hover:scale-[1.01] transition-transform duration-300"
               />
             </div>
@@ -266,10 +320,11 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
                 </div>
                 <button
                   onClick={handleCopyCode}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-all duration-200 ${isCopied
-                      ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                      : 'bg-slate-700/50 text-slate-300 border-slate-600 hover:bg-slate-600/50 hover:text-white'
-                    }`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-all duration-200 ${
+                    isCopied
+                      ? "bg-green-500/20 text-green-400 border-green-500/30"
+                      : "bg-slate-700/50 text-slate-300 border-slate-600 hover:bg-slate-600/50 hover:text-white"
+                  }`}
                 >
                   {isCopied ? (
                     <>
@@ -298,7 +353,9 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
           {post.poll && (
             <div className="mb-4 p-4 rounded-xl border border-slate-700/50 bg-slate-800/30">
               <div className="flex items-center justify-between mb-3">
-                <h5 className="text-white font-semibold text-lg">{post.poll.question}</h5>
+                <h5 className="text-white font-semibold text-lg">
+                  {post.poll.question}
+                </h5>
                 {post.poll.endsAt && (
                   <div className="flex items-center gap-1 text-sm text-amber-400">
                     <Clock size={14} />
@@ -308,19 +365,20 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
               </div>
 
               <div className="space-y-3">
-                {post.poll.options.map((option:any, index:any) => (
+                {post.poll.options.map((option: any, index: any) => (
                   <button
                     key={index}
                     onClick={() => onVote?.(post._id, index)}
                     disabled={post.poll?.userVoted}
-                    className={`w-full text-left p-3 rounded-lg border transition-all duration-200 relative overflow-hidden ${post.poll?.userVoted
-                        ? 'bg-slate-700/50 border-slate-600'
-                        : 'hover:border-purple-500/50 border-slate-700/50 hover:bg-slate-700/30'
-                      }`}
+                    className={`w-full text-left p-3 rounded-lg border transition-all duration-200 relative overflow-hidden ${
+                      post.poll?.userVoted
+                        ? "bg-slate-700/50 border-slate-600"
+                        : "hover:border-purple-500/50 border-slate-700/50 hover:bg-slate-700/30"
+                    }`}
                   >
                     {post.poll?.userVoted && (
                       <div
-                        className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10"
+                        className="absolute inset-0 bg-linear-to-r from-purple-500/10 to-pink-500/10"
                         style={{ width: `${option.percentage}%` }}
                       ></div>
                     )}
@@ -328,7 +386,9 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
                       <span className="text-slate-200">{option.text}</span>
                       {post.poll?.userVoted && (
                         <div className="flex items-center gap-2">
-                          <span className="text-slate-300 text-sm">{option.votes} votes</span>
+                          <span className="text-slate-300 text-sm">
+                            {option.votes} votes
+                          </span>
                           <span className="text-white font-semibold bg-slate-700/50 px-2 py-1 rounded text-xs">
                             {option.percentage}%
                           </span>
@@ -357,23 +417,27 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
 
           {/* Achievement Content */}
           {post.achievement && (
-            <div className="mb-4 p-4 rounded-xl border border-slate-700/50 bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-orange-500/10">
+            <div className="mb-4 p-4 rounded-xl border border-slate-700/50 bg-linear-to-r from-yellow-500/10 via-amber-500/10 to-orange-500/10">
               <div className="flex items-start gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white text-xl">
+                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white text-xl">
                   🏆
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <h5 className="text-white font-semibold">{post.achievement.title}</h5>
+                    <h5 className="text-white font-semibold">
+                      {post.achievement.title}
+                    </h5>
                     {post.achievement.level && (
                       <span className="px-2 py-0.5 text-xs bg-yellow-500/20 text-yellow-400 rounded border border-yellow-500/30">
                         {post.achievement.level}
                       </span>
                     )}
                   </div>
-                  <p className="text-slate-300 text-sm mb-3">{post.achievement.description}</p>
+                  <p className="text-slate-300 text-sm mb-3">
+                    {post.achievement.description}
+                  </p>
                   <div className="flex flex-wrap gap-2">
-                    {post.achievement.tags.map((tag:any, index:any) => (
+                    {post.achievement.tags.map((tag: any, index: any) => (
                       <span
                         key={index}
                         className="px-2 py-1 bg-yellow-500/20 text-yellow-300 text-xs rounded-lg border border-yellow-500/30"
@@ -392,7 +456,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
             <div className="mb-4 rounded-xl border border-slate-700/50 overflow-hidden hover:border-slate-600/50 transition-colors">
               <div className="flex flex-col md:flex-row">
                 {post.link.image && (
-                  <div className="md:w-48 flex-shrink-0">
+                  <div className="md:w-48 shrink-0">
                     <img
                       src={post.link.image}
                       alt={post.link.title}
@@ -401,7 +465,9 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
                   </div>
                 )}
                 <div className="flex-1 p-4">
-                  <div className="text-sm text-slate-400 mb-1">{post.link.domain || new URL(post.link.url).hostname}</div>
+                  <div className="text-sm text-slate-400 mb-1">
+                    {post.link.domain || new URL(post.link.url).hostname}
+                  </div>
                   <h5 className="text-white font-semibold mb-2 hover:text-blue-400 transition-colors">
                     {post.link.title}
                   </h5>
@@ -430,13 +496,19 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
             <div className="flex items-center gap-4">
               <button
                 onClick={() => onLike?.(post._id)}
-                className={`flex items-center gap-2 transition-all duration-200 ${post.isLiked
-                    ? 'text-red-500 hover:text-red-400'
-                    : 'text-slate-400 hover:text-red-400'
-                  }`}
+                className={`flex items-center gap-2 transition-all duration-200 ${
+                  post.isLiked
+                    ? "text-red-500 hover:text-red-400"
+                    : "text-slate-400 hover:text-red-400"
+                }`}
               >
-                <Heart size={20} fill={post.isLiked ? 'currentColor' : 'none'} />
-                <span className="text-sm font-medium">{post.likes.toLocaleString()}</span>
+                <Heart
+                  size={20}
+                  fill={post.isLiked ? "currentColor" : "none"}
+                />
+                <span className="text-sm font-medium">
+                  {post.likes.toLocaleString()}
+                </span>
               </button>
 
               <button
@@ -444,7 +516,9 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
                 className="flex items-center gap-2 text-slate-400 hover:text-blue-400 transition-colors"
               >
                 <MessageCircle size={20} />
-                <span className="text-sm font-medium">{post.comments.toLocaleString()}</span>
+                <span className="text-sm font-medium">
+                  {post.comments.toLocaleString()}
+                </span>
               </button>
 
               <button
@@ -452,17 +526,23 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
                 className="flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-colors"
               >
                 <Share2 size={20} />
-                <span className="text-sm font-medium">{post.shares.toLocaleString()}</span>
+                <span className="text-sm font-medium">
+                  {post.shares.toLocaleString()}
+                </span>
               </button>
 
               <button
                 onClick={() => onBookmark?.(post._id)}
-                className={`flex items-center gap-2 transition-colors ${post.isBookmarked
-                    ? 'text-yellow-500 hover:text-yellow-400'
-                    : 'text-slate-400 hover:text-yellow-400'
-                  }`}
+                className={`flex items-center gap-2 transition-colors ${
+                  post.isBookmarked
+                    ? "text-yellow-500 hover:text-yellow-400"
+                    : "text-slate-400 hover:text-yellow-400"
+                }`}
               >
-                <Bookmark size={20} fill={post.isBookmarked ? 'currentColor' : 'none'} />
+                <Bookmark
+                  size={20}
+                  fill={post.isBookmarked ? "currentColor" : "none"}
+                />
                 {/* <span className="text-sm font-medium">{post.bookmarks.toLocaleString()}</span> */}
               </button>
             </div>
@@ -474,7 +554,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
               </button>
               <button
                 onClick={() => onFollow?.(post.community.name)}
-                className="px-3 py-1.5 text-sm bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 hover:text-white hover:from-purple-500/30 hover:to-pink-500/30 rounded-lg border border-purple-500/30 hover:border-purple-500/50 transition-all"
+                className="px-3 py-1.5 text-sm bg-linear-to-r from-purple-500/20 to-pink-500/20 text-purple-400 hover:text-white hover:from-purple-500/30 hover:to-pink-500/30 rounded-lg border border-purple-500/30 hover:border-purple-500/50 transition-all"
               >
                 Follow Community
               </button>

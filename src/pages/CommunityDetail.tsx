@@ -5,12 +5,10 @@ import { CommunityActionModal } from "../model/CommunityActionModal";
 import type { Post } from "../types/types";
 import CreatePost from "../components/CreatePost";
 import { getUser } from "../utils/userStorage";
-import { formatTimeAgo } from "../utils/helper";
 import CommunityPostCard from "../components/card/CommunityPostCard";
 
 export default function CommunityDetail() {
   const { id } = useParams();
-  const [isCopied, setIsCopied] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const currentUser = getUser();
@@ -34,7 +32,7 @@ export default function CommunityDetail() {
   const [isLoading, setIsLoading] = useState(false);
 
   console.log("community", community);
-  console.log('posts', posts)
+  console.log("posts", posts);
 
   useEffect(() => {
     const fetchCommunityPost = async () => {
@@ -66,29 +64,6 @@ export default function CommunityDetail() {
     }
   };
 
-   const handleCopyCode = async (post:any) => {
-    try {
-      await navigator.clipboard.writeText(post.code?.code || '');
-      setIsCopied(true);
-
-      // Reset copied status after 2 seconds
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy code: ', err);
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = post.code?.code || '';
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    }
-  };
-
   const handleJoinClick = () => {
     setModalType("join");
     setIsModalOpen(true);
@@ -97,53 +72,6 @@ export default function CommunityDetail() {
   const handleLeaveClick = () => {
     setModalType("leave");
     setIsModalOpen(true);
-  };
-
-  const handleLikePost = (postId: string) => {
-    setPosts(
-      posts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              isLiked: !post.isLiked,
-              likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-            }
-          : post
-      )
-    );
-  };
-
-  const handleVotePoll = (postId: string, optionIndex: number) => {
-    setPosts(
-      posts.map((post) => {
-        if (post.id === postId && post.poll && !post.poll.userVoted) {
-          const newOptions = post.poll.options.map((option, index) => ({
-            ...option,
-            votes: index === optionIndex ? option.votes + 1 : option.votes,
-          }));
-
-          const totalVotes = newOptions.reduce(
-            (sum, option) => sum + option.votes,
-            0
-          );
-          const optionsWithPercentages = newOptions.map((option) => ({
-            ...option,
-            percentage: Math.round((option.votes / totalVotes) * 100),
-          }));
-
-          return {
-            ...post,
-            poll: {
-              ...post.poll,
-              options: optionsWithPercentages,
-              totalVotes,
-              userVoted: true,
-            },
-          };
-        }
-        return post;
-      })
-    );
   };
 
   // Post Creation Functions
@@ -170,34 +98,6 @@ export default function CommunityDetail() {
         return "Mod";
       default:
         return "Member";
-    }
-  };
-
-  const getPostTypeIcon = (type: string) => {
-    switch (type) {
-      case "code":
-        return "💻";
-      case "achievement":
-        return "🎉";
-      case "poll":
-        return "📊";
-      default:
-        return "🖼️";
-    }
-  };
-
-  const getPostTypeColor = (type: string) => {
-    switch (type) {
-      case "code":
-        return "text-blue-400";
-      case "question":
-        return "text-yellow-400";
-      case "achievement":
-        return "text-green-400";
-      case "poll":
-        return "text-purple-400";
-      default:
-        return "text-slate-400";
     }
   };
 
@@ -398,269 +298,11 @@ export default function CommunityDetail() {
             {activeTab === "posts" && (
               <div className="space-y-6">
                 {posts?.map((post: any) => (
-          //         <div
-          //           key={post._id}
-          //           className="bg-slate-800/50 rounded-2xl border border-slate-700/50 p-6 hover:border-slate-600/50 transition-all duration-200"
-          //         >
-          //           {/* Post Header */}
-          //           <div className="flex items-start justify-between mb-4">
-          //             <div className="flex  items-start space-x-4 flex-1">
-          //               <div className="w-12 h-12 bg-linear-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center overflow-hidden justify-center text-white font-bold">
-          //                 <img
-          //                   src={post.author?.avatar}
-          //                   alt="author profile"
-          //                   className="w-full h-fit object-cover"
-          //                 />
-          //               </div>
-          //               <div className="flex-1">
-          //                 <div className="flex items-center gap-2 mb-1">
-          //                   <h4 className="text-white font-semibold">
-          //                     {post.author?.name}
-          //                   </h4>
-          //                   {/* {post.author?.role &&
-          //                     post.author.role !== "member" && (
-          //                       <span
-          //                         className={`px-2 py-1 text-xs rounded-lg border ${getRoleColor(
-          //                           post.author.role
-          //                         )}`}
-          //                       >
-          //                         {getRoleBadge(post.author.role)}
-          //                       </span>
-          //                     )} */}
-          //                   <span
-          //                     className={`px-2 py-1 text-xs rounded-lg border ${getRoleColor(
-          //                      isAdmin? "admin": "member"
-          //                     )}`}
-          //                   >
-          //                     {getRoleBadge(isAdmin? "admin": "member")}
-                              
-          //                   </span>
-                           
-          //                   <span className="text-slate-500">•</span>
-          //                    <span className={`${getPostTypeColor(post.type)}`}>
-          //                     {getPostTypeIcon(post.type)}
-          //                   </span>
-          //                 </div>
-          //                 {/* <div className="flex items-center space-x-2">
-          //                   <span className={`${getPostTypeColor(post.type)}`}>
-          //                     {getPostTypeIcon(post.type)}
-          //                   </span>
-          //                   <span className="text-slate-400 text-sm capitalize">
-          //                     {post.type}
-          //                   </span>
-          //                 </div> */}
-
-          //                  <span className="text-slate-400 text-sm">
-          //                     {formatTimeAgo(post?.createdAt)}
-          //                   </span>
-          //               </div>
-          //             </div>
-          //           </div>
-
-          //           {/* Post Content */}
-          //           <div className="mb-4">
-          //             <p className="text-slate-300 leading-relaxed whitespace-pre-line mb-4">
-          //               {post.content}
-          //             </p>
-          //             {post.image && (
-          //               <div className="w-full rounded-2xl overflow-hidden">
-          //                 <img src={post.image.url} alt="image" className="w-full h-auto max-h-96 object-center" />
-          //               </div>
-          //             )}
-
-
-          //             {/* Code Block */}
-          //             {post.code && (
-          //               // <div className="mt-4 bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
-          //               //   <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
-          //               //     <span className="text-slate-300 text-sm font-medium">
-          //               //       {post.code.language}
-          //               //     </span>
-          //               //     <button className="text-slate-400 hover:text-white text-sm">
-          //               //       Copy
-          //               //     </button>
-          //               //   </div>
-          //               //   <pre className="p-4 text-slate-200 text-sm overflow-x-auto">
-          //               //     <code>{post.code.code}</code>
-          //               //   </pre>
-          //               // </div>
-          //                <div className="bg-linear-to-br from-gray-900 to-slate-900 rounded-xl p-4 mt-3 border border-gray-700/50 shadow-lg">
-          //   {/* Header with language and copy button */}
-          //   <div className="flex justify-between items-center mb-4">
-          //     <div className="flex items-center space-x-2">
-          //       <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          //       <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-          //       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          //     </div>
-          //     <div className="flex items-center space-x-3">
-          //       <span className="text-xs font-medium text-gray-300 bg-gray-800/50 px-2 py-1 rounded-md border border-gray-700">
-          //         {post.code?.language || 'Code'}
-          //       </span>
-          //       <button
-          //         onClick={() => handleCopyCode(post)}
-          //         className={`flex items-center space-x-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 font-medium ${isCopied
-          //           ? 'bg-green-500/20 text-green-400 border-green-500/30 shadow-sm'
-          //           : 'bg-gray-800/50 text-gray-300 border-gray-600 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 active:scale-95'
-          //           }`}
-          //       >
-          //         {isCopied ? (
-          //           <>
-          //             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-          //               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-          //             </svg>
-          //             <span>Copied!</span>
-          //           </>
-          //         ) : (
-          //           <>
-          //             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          //               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          //             </svg>
-          //             <span>Copy</span>
-          //           </>
-          //         )}
-          //       </button>
-          //     </div>
-          //   </div>
-
-          //   {/* Code block */}
-          //   <div className="relative">
-          //     <pre className="text-gray-100 overflow-x-auto custom-scrollbar text-sm font-mono max-h-[400px] bg-gray-950/50 rounded-lg p-4 border border-gray-700/30">
-          //       <code className="block whitespace-pre overflow-x-auto">
-          //         {post.code?.code}
-          //       </code>
-          //     </pre>
-
-
-          //   </div>
-
-          //   {/* File info footer */}
-          //   <div className="flex justify-between items-center mt-3 text-xs text-gray-400">
-          //     <span className="flex items-center space-x-1">
-          //       <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-          //         <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-          //       </svg>
-          //       <span>Code Snippet</span>
-          //     </span>
-          //     <span>{post.code?.code.split('\n').length} lines</span>
-          //   </div>
-          // </div>
-          //             )}
-
-          //             {/* Achievement Block */}
-          //             {post.achievement && (
-          //               <div className="mt-4 bg-linear-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/20 p-4">
-          //                 <div className="flex items-center space-x-3 mb-3">
-          //                   <div className="w-10 h-10 bg-linear-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-white">
-          //                     🏆
-          //                   </div>
-          //                   <div>
-          //                     <h4 className="text-white font-semibold">
-          //                       {post.achievement.title}
-          //                     </h4>
-          //                     <p className="text-slate-300 text-sm">
-          //                       {post.achievement.description}
-          //                     </p>
-          //                   </div>
-          //                 </div>
-          //                 <div className="flex flex-wrap gap-2">
-          //                   {post.achievement.tags.map((tag: any) => (
-          //                     <span
-          //                       key={tag}
-          //                       className="px-2 py-1 bg-green-500/20 text-green-300 text-xs rounded-lg border border-green-500/30"
-          //                     >
-          //                       #{tag}
-          //                     </span>
-          //                   ))}
-          //                 </div>
-          //               </div>
-          //             )}
-
-          //             {/* Poll Block */}
-          //             {post.poll && (
-          //               <div className="mt-4 bg-slate-800/30 rounded-xl border border-slate-700/50 p-4">
-          //                 <h4 className="text-white font-semibold mb-3">
-          //                   {post.poll.question}
-          //                 </h4>
-          //                 <div className="space-y-2">
-          //                   {post.poll.options.map(
-          //                     (option: any, index: any) => (
-          //                       <button
-          //                         key={index}
-          //                         onClick={() => handleVotePoll(post.id, index)}
-          //                         disabled={post.poll?.userVoted}
-          //                         className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ${
-          //                           post.poll?.userVoted
-          //                             ? "bg-slate-700/50 border-slate-600"
-          //                             : "hover:border-purple-500/50 border-slate-700/50"
-          //                         }`}
-          //                       >
-          //                         <div className="flex items-center justify-between mb-1">
-          //                           <span className="text-slate-200">
-          //                             {option.text}
-          //                           </span>
-          //                           {post.poll?.userVoted && (
-          //                             <span className="text-slate-400 text-sm">
-          //                               {option.percentage}%
-          //                             </span>
-          //                           )}
-          //                         </div>
-          //                         {post.poll?.userVoted && (
-          //                           <div className="w-full bg-slate-700 rounded-full h-2">
-          //                             <div
-          //                               className="bg-linear-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
-          //                               style={{
-          //                                 width: `${option.percentage}%`,
-          //                               }}
-          //                             ></div>
-          //                           </div>
-          //                         )}
-          //                       </button>
-          //                     )
-          //                   )}
-          //                 </div>
-          //                 <div className="flex items-center justify-between mt-3 text-slate-400 text-sm">
-          //                   <span>{post.poll.totalVotes} votes</span>
-          //                   {post.poll.userVoted && (
-          //                     <span className="text-green-400">
-          //                       ✓ You voted
-          //                     </span>
-          //                   )}
-          //                 </div>
-          //               </div>
-          //             )}
-          //           </div>
-
-          //           {/* Post Actions */}
-          //           <div className="flex items-center justify-between pt-4 border-t border-slate-700/50">
-          //             <div className="flex items-center space-x-6">
-          //               <button
-          //                 onClick={() => handleLikePost(post.id)}
-          //                 className={`flex items-center space-x-2 transition-all duration-200 ${
-          //                   post.isLiked
-          //                     ? "text-red-500"
-          //                     : "text-slate-400 hover:text-red-400"
-          //                 }`}
-          //               >
-          //                 <span className="text-lg">
-          //                   {post.isLiked ? "❤️" : "🤍"}
-          //                 </span>
-          //                 <span className="text-sm">{post.likes}</span>
-          //               </button>
-          //               <button className="flex items-center space-x-2 text-slate-400 hover:text-blue-400 transition-colors duration-200">
-          //                 <span className="text-lg">💬</span>
-          //                 <span className="text-sm">{post.comments}</span>
-          //               </button>
-          //               <button className="flex items-center space-x-2 text-slate-400 hover:text-green-400 transition-colors duration-200">
-          //                 <span className="text-lg">🔄</span>
-          //                 <span className="text-sm">{post.shares}</span>
-          //               </button>
-          //             </div>
-          //             <button className="text-slate-400 hover:text-white transition-colors duration-200 p-2 hover:bg-slate-700/50 rounded-lg">
-          //               ⋮
-          //             </button>
-          //           </div>
-          //         </div>
-          <CommunityPostCard post={post} key={post._id} isAdmin={isAdmin}/>
+                  <CommunityPostCard
+                    post={post}
+                    key={post._id}
+                    isAdmin={isAdmin}
+                  />
                 ))}
               </div>
             )}
