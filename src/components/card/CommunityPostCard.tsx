@@ -242,7 +242,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
 
           {/* Community & Actions */}
           <div className="flex items-center gap-3">
-            {/* <CommunityBadge /> */}
+            <CommunityBadge />
             <div className="relative">
               <button
                 onClick={() => setShowMoreOptions(!showMoreOptions)}
