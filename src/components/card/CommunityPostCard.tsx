@@ -184,7 +184,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
       {/* Main Card */}
       <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-5 hover:border-slate-600/50 transition-all duration-300 hover:shadow-xl hover:shadow-slate-900/20">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
+        <div className="flex flex-row sm:items-start justify-between gap-4 mb-5">
           <div className="flex items-start gap-3 flex-1">
             {/* Author Avatar */}
             <div className="relative">
@@ -242,7 +242,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
 
           {/* Community & Actions */}
           <div className="flex items-center gap-3">
-            <CommunityBadge />
+            {/* <CommunityBadge /> */}
             <div className="relative">
               <button
                 onClick={() => setShowMoreOptions(!showMoreOptions)}
