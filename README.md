@@ -1,73 +1,95 @@
-# React + TypeScript + Vite
+# 🌐 SocialHub
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SocialHub is a **full-stack social media platform** inspired by Instagram, designed to provide a modern, feature-rich social networking experience. Users can share content, engage with communities, interact through likes and nested comments, and manage their profiles securely.
 
-Currently, two official plugins are available:
+🚀 **Live Demo:**  
+👉 https://socialhub-frontend-one.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+SocialHub allows users to:
 
-## Expanding the ESLint configuration
+- 📝 Create and share posts:
+  - Code posts  
+  - Polls  
+  - Achievements  
+  - Image-based posts  
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 👥 Create, manage, and post in communities  
+- ❤️ Like posts  
+- 💬 Add **nested comments**, like comments, reply to comments, and delete comments  
+- 🔗 Share posts across:
+  - WhatsApp  
+  - Facebook  
+  - LinkedIn  
+  - Copy link  
+  - Download images  
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- 🤝 Follow / Unfollow users and explore profiles  
+- ✏️ Edit and update user profile & settings  
+- 🔍 Powerful search functionality  
+- 🗑️ Full account control:
+  - Delete posts  
+  - Delete communities  
+  - Delete user account  
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- 🔐 Secure authentication using **Google Sign-In**  
+- 📧 Email notifications via **Nodemailer**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🛠 Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Frontend
+- React  
+- TypeScript  
+- Tailwind CSS  
+- Vite  
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Backend
+- Node.js  
+- Express.js  
+
+### Database
+- MongoDB  
+
+### Authentication
+- react-oauth/google  
+
+### Utilities & Libraries
+- Nodemailer  
+- js-cookie  
+- react-router-dom  
+
+### AI Assistance
+- ChatGPT  
+- DeepSeek AI  
+
+---
+
+## 📚 What I Learned
+
+This project helped me strengthen my understanding of:
+
+- Scalable backend API design  
+- Authentication & authorization flows  
+- MongoDB schema design and relationships  
+- Modern React architecture with TypeScript  
+- Building real-world UX-focused applications  
+- Full-stack application deployment  
+
+---
+
+## 🚀 Getting Started (Optional)
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/socialhub.git
+
+# Install dependencies
+npm install
+
+# Run the project
+npm run dev
