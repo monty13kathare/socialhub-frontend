@@ -1084,7 +1084,7 @@ const Post: React.FC<PostProps> = ({
             src={post.image.url}
             alt="Post attachment"
             loading="lazy"
-            className="w-full h-auto max-h-96 object-cover"
+            className="w-full h-fit  object-cover"
           />
         </div>
       )}

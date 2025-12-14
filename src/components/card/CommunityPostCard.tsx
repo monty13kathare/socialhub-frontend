@@ -12,8 +12,6 @@ import {
   FileText,
   Copy,
   Check,
-  Globe,
-  Lock,
   Clock,
   Zap,
   ExternalLink,
@@ -28,7 +26,6 @@ interface CommunityPostCardProps {
   onShare?: (postId: string) => void;
   onBookmark?: (postId: string) => void;
   onVote?: (postId: string, optionIndex: number) => void;
-  onFollow?: (communityName: string) => void;
 }
 
 const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
@@ -39,7 +36,6 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
   onShare,
   onBookmark,
   onVote,
-  onFollow,
 }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
@@ -116,31 +112,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
   };
 
   // Render community badge
-  const CommunityBadge = () => (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 rounded-lg border border-slate-700/50">
-      <div className="w-6 h-6 rounded-md overflow-hidden bg-linear-to-br from-purple-500 to-pink-500">
-        {post.community.avatar ? (
-          <img
-            src={post.community.avatar}
-            alt={post.community.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">
-            {/* {post.community.name.charAt(0)} */}
-          </div>
-        )}
-      </div>
-      <span className="text-sm font-medium text-white">
-        {post.community.name}
-      </span>
-      {post.community.isPrivate ? (
-        <Lock size={12} className="text-slate-400" />
-      ) : (
-        <Globe size={12} className="text-slate-400" />
-      )}
-    </div>
-  );
+ 
 
   // Render author role badge
   const RoleBadge = () => {
@@ -227,12 +199,12 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
                     <span className="text-slate-500">Edited</span>
                   </>
                 )} */}
-                {post.views !== undefined && (
+                {post?.views !== undefined && (
                   <>
                     <span className="text-slate-600">•</span>
                     <span className="flex items-center gap-1">
                       <Eye size={12} />
-                      {post.views.toLocaleString()} views
+                      {post?.views?.toLocaleString() || 0} views
                     </span>
                   </>
                 )}
@@ -242,7 +214,6 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
 
           {/* Community & Actions */}
           <div className="flex items-center gap-3">
-            <CommunityBadge />
             <div className="relative">
               <button
                 onClick={() => setShowMoreOptions(!showMoreOptions)}
@@ -548,7 +519,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
             </div>
 
             {/* Additional Actions */}
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <button className="px-3 py-1.5 text-sm text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors">
                 Follow Post
               </button>
@@ -558,7 +529,7 @@ const CommunityPostCard: React.FC<CommunityPostCardProps> = ({
               >
                 Follow Community
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

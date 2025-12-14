@@ -196,11 +196,11 @@ export default function CreateUserPost({ currentUser, onPostCreated, onCancel }:
         setIsSearchingUsers(true);
         try {
             await new Promise(resolve => setTimeout(resolve, 300));
-            const filteredUsers = tagUsers.filter(user =>
-                user.name.toLowerCase().includes(query.toLowerCase()) ||
-                user.username.toLowerCase().includes(query.toLowerCase())
+            const filteredUsers = tagUsers?.filter(user =>
+                user.name?.toLowerCase()?.includes(query?.toLowerCase()) ||
+                user?.username?.toLowerCase()?.includes(query?.toLowerCase())
             );
-            setUserSearchResults(filteredUsers.slice(0, 5));
+            setUserSearchResults(filteredUsers?.slice(0, 5));
         } catch (error) {
             console.error('Error searching users:', error);
             setUserSearchResults([]);
@@ -210,7 +210,7 @@ export default function CreateUserPost({ currentUser, onPostCreated, onCancel }:
     }, [tagUsers]);
 
     const handleTagUser = (user: TagUserSearchResult) => {
-        if (!newPost.taggedUsers.find(u => u._id === user._id)) {
+        if (!newPost.taggedUsers?.find(u => u._id === user._id)) {
             setNewPost(prev => ({
                 ...prev,
                 taggedUsers: [...prev.taggedUsers, user as User]
@@ -1067,7 +1067,7 @@ export default function CreateUserPost({ currentUser, onPostCreated, onCancel }:
                         <button
                             type="submit"
                             disabled={!canSubmit() || isSubmitting}
-                            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                            className="px-6 py-2 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-500 hover:to-pink-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                         >
                             {isSubmitting && (
                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

@@ -109,13 +109,13 @@ export default function UserSearchPage() {
 
     // Text search
     if (filters.query) {
-      const query = filters.query.toLowerCase();
+      const query = filters.query?.toLowerCase();
       result = result.filter(
         (user) =>
-          user.name.toLowerCase().includes(query) ||
-          user.username.toLowerCase().includes(query) ||
-          user.bio.toLowerCase().includes(query) ||
-          user.tags?.some((tag) => tag.toLowerCase().includes(query))
+          user?.name?.toLowerCase()?.includes(query) ||
+          user?.username?.toLowerCase()?.includes(query) ||
+          user?.bio?.toLowerCase()?.includes(query) ||
+          user?.tags?.some((tag) => tag.toLowerCase()?.includes(query))
       );
     }
 
@@ -243,7 +243,7 @@ export default function UserSearchPage() {
             {/* Filter Toggle Button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="lg:w-auto px-6 py-3 bg-slate-700/50 border border-slate-600 text-white rounded-xl hover:bg-slate-600/50 transition-all duration-200 flex items-center space-x-2"
+              className="w-fit lg:w-auto px-6 py-3 bg-slate-700/50 border border-slate-600 text-white rounded-xl hover:bg-slate-600/50 transition-all duration-200 flex items-center space-x-2"
             >
               <span>Filters</span>
               <span

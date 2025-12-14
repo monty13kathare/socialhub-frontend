@@ -87,7 +87,7 @@ export default function FollowModal({
         </div>
 
         {/* Users List */}
-        <div className="overflow-y-auto max-h-96">
+        <div className="overflow-y-auto max-h-96 custom-scrollbar">
           {filteredUsers.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-slate-400">No {type} found</p>
