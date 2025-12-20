@@ -172,7 +172,7 @@ export default function MessagePage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] bg-slate-900">
+    <div className="flex h-[calc(100vh-5rem)] bg-slate-900">
       {/* Conversations List */}
       <div
         className={`${
@@ -183,9 +183,9 @@ export default function MessagePage() {
         <div className="p-6 border-b border-slate-700/50">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-white">Messages</h1>
-            <button className="w-10 h-10 bg-linear-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white hover:from-purple-700 hover:to-pink-700 transition-all">
+            {/* <button className="w-10 h-10 bg-linear-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white hover:from-purple-700 hover:to-pink-700 transition-all">
               ✏️
-            </button>
+            </button> */}
           </div>
 
           {/* Search */}
@@ -261,7 +261,7 @@ export default function MessagePage() {
       <div
         className={`${
           activeConversation ? "flex" : "hidden md:flex"
-        } flex-1 flex-col bg-slate-900/50`}
+        } w-full flex-col bg-slate-900/50`}
       >
         {activeConversation && currentConversation ? (
           <>

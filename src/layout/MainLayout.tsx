@@ -65,14 +65,14 @@ export default function MainLayout() {
         {/* Main Content - Mobile Responsive */}
         <main
           className={`
-    flex-1 min-h-screen transition-all duration-300
+      transition-all duration-300
     w-full overflow-x-hidden
     ${isSidebarOpen ? "lg:ml-0" : "lg:ml-0"}
     ${isRightSidebarOpen ? "lg:mr-0" : "lg:mr-0"}
   `}
           onClick={closeAllSidebars}
         >
-          <div className="w-full max-w-full mx-auto p-3 sm:p-4 md:p-5 lg:p-6 ">
+          <div className="w-full max-w-full mx-auto p-3 sm:p-4 md:p-5 lg:p-6 h-[calc(100%-4rem)] ">
             <Outlet />
           </div>
         </main>

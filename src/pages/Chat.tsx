@@ -9,7 +9,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { socket } from "../socket";
 import { getMessages } from "../api/chat";
 import { getUser } from "../utils/userStorage";
-import { Send, Image, Smile, MoreVertical, ChevronLeft } from "lucide-react";
+import { Send, MoreVertical, ChevronLeft } from "lucide-react";
 import MessageBubble from "../components/message/MessageBubble";
 
 // Types
@@ -242,9 +242,9 @@ export default function Chat() {
   }
 
   return (
-    <div className="flex flex-col  max-h-[calc(100vh-5rem)] bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="flex flex-col w-full  max-h-[calc(100% - 4rem)]">
       {/* Header */}
-      <div className="fixed w-full top-20 z-10 bg-gray-900/95 backdrop-blur-md border-b border-gray-700 p-4">
+      <div className=" h-20 z-10 bg-gray-900/95 backdrop-blur-md border-b border-gray-700 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button className=" text-gray-300 hover:text-white">
@@ -291,15 +291,15 @@ export default function Chat() {
       {/* Messages Container */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth max-h-full mt-20"
+        className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth"
       >
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-linear-to-r from-purple-500 to-pink-500 animate-spin" />
-              <p className="text-gray-400">Loading messages...</p>
-            </div>
-          </div>
+         <div className="flex items-center justify-center p-8 h-screen">
+  <div className="relative w-16 h-16">
+    <div className="absolute w-full h-full rounded-full border-4 border-dotted border-gray-300 opacity-20"></div>
+    <div className="absolute w-full h-full rounded-full border-4 border-dotted border-purple-500 border-t-transparent animate-spin"></div>
+  </div>
+</div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-screen text-center px-4">
             <div className="w-24 h-24 rounded-full bg-linear-to-r from-purple-500/20 to-pink-500/20 mb-6 flex items-center justify-center">
@@ -345,15 +345,15 @@ export default function Chat() {
                 </div>
               );
             })}
-            <div ref={messagesEndRef} />
+            <div ref={messagesEndRef} className="h-full bg-green-400" />
           </>
         )}
       </div>
 
       {/* Input Area */}
-      <div className="sticky bottom-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-700 p-4">
-        <form onSubmit={sendMessage} className="flex items-center gap-2">
-          <button
+      <div className="h-20 w-full bg-gray-900/95 backdrop-blur-md border-t border-gray-700 p-4">
+        <form onSubmit={sendMessage} className="flex w-full items-center gap-2">
+          {/* <button
             type="button"
             className="p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full transition-colors"
           >
@@ -365,9 +365,9 @@ export default function Chat() {
             className="p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full transition-colors"
           >
             <Smile className="w-5 h-5" />
-          </button>
+          </button> */}
 
-          <div className="flex-1 relative">
+          <div className="w-full relative">
             <textarea
               ref={textareaRef}
               value={text}
