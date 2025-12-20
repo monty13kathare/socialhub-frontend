@@ -61,7 +61,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
       id: "messages",
       icon: <MessageCircle />,
       label: "Messages",
-      badge: "soon",
+      badge: null,
       path: "/messages",
     },
     // { id: 'bookmarks', icon: '📑', label: 'Bookmarks', badge: null, path: '/bookmarks' },

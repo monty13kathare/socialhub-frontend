@@ -72,7 +72,7 @@ export default function MainLayout() {
   `}
           onClick={closeAllSidebars}
         >
-          <div className="w-full max-w-full mx-auto p-3 sm:p-4 md:p-5 lg:p-6">
+          <div className="w-full max-w-full mx-auto p-3 sm:p-4 md:p-5 lg:p-6 ">
             <Outlet />
           </div>
         </main>

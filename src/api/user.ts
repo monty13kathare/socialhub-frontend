@@ -30,6 +30,9 @@ export const updateProfile = (data: any) => API.put("/update", data, {
 // ✅ get All Users
 export const getAllUsers = () => API.get("/all");
 
+export const getChatUsers = () => API.get("/chat-users");
+
+
 export const getUserDetail = (userId:string) => API.get(`/${userId}`);
 
 

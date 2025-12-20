@@ -158,7 +158,7 @@ export default function Topbar() {
               className="p-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/50 relative"
               aria-label="Messages"
             >
-              <MessageCircle size={18} />
+              <MessageCircle size={18} onClick={() => navigate("/messages")} />
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-800"></span>
             </button>
 

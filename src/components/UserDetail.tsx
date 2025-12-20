@@ -7,6 +7,7 @@ import CommunityCard from './card/CommunityCard';
 import FollowModal from '../model/FollowModal';
 import { useNavigate, useParams } from 'react-router-dom';
 import Post from './card/Post';
+import { createConversation } from '../api/chat';
 
 interface ProfilePageProps {
     isOwnProfile?: boolean;
@@ -111,9 +112,18 @@ export default function UserDetail({ isOwnProfile }: ProfilePageProps) {
     const handleJoinCommunity = () => { }
 
 
-    const handleMessage = () => {
-        console.log('Navigate to messages with user:', userDetail._id);
-        navigate(`/messages/${id}`)
+    // const handleMessage = () => {
+    //     console.log('Navigate to messages with user:', userDetail._id);
+    //     navigate(`/messages/${id}`)
+    // };
+
+      const handleMessage = async (user:any) => {
+         const res = await createConversation(user._id);
+    
+      const conversationId = res.data._id;
+      navigate(`/messages/${conversationId}`, {
+        state: { user }, // 👈 pass full user data
+      });
     };
 
     const handleSaveProfile = async (updatedUser: any) => {
@@ -441,7 +451,7 @@ export default function UserDetail({ isOwnProfile }: ProfilePageProps) {
                         ) : (
                             <>
                                 <button
-                                    onClick={handleMessage}
+                                    onClick={() => handleMessage(userDetail)}
                                     className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-slate-700/50 text-white rounded-xl hover:bg-slate-600/50 transition-all text-sm"
                                 >
                                     <span>💬</span>

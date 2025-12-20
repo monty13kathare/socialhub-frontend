@@ -4,7 +4,6 @@ import PrivateRoute from "./PrivateRoute";
 
 import MessagePage from "../pages/MessagePage";
 import ExplorePage from "../pages/ExplorePage";
-import ChatTest from "../pages/ChatText";
 import Premium from "../pages/Premium";
 import Communities from "../pages/Communities";
 import CreateCommunity from "../pages/CreateCommunity";
@@ -16,6 +15,7 @@ import UserSearchPage from "../pages/UserSearchPage";
 import PostSearchPage from "../pages/PostSearchPage";
 import UserProfile from "../pages/UserProfile";
 import Profile from "../pages/Profile";
+import Chat from "../pages/Chat";
 
 export default function AppRoutes() {
   return (
@@ -34,7 +34,7 @@ export default function AppRoutes() {
 
 
         <Route path="messages" element={<MessagePage />} />
-        <Route path="messages/:id" element={<ChatTest />} />
+        <Route path="messages/:conversationId" element={<Chat />} />
         <Route path="explore" element={<ExplorePage />} />
         <Route path="premium" element={<Premium />} />
 
@@ -44,7 +44,7 @@ export default function AppRoutes() {
         <Route path="communities/create" element={<CreateCommunity />} />
         <Route path="communities/:id" element={<CommunityDetail />} />
 
-        
+
 
       </Route>
 

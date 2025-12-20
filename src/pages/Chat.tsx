@@ -1,580 +1,412 @@
-import { useState, useEffect, useRef } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  type FormEvent,
+} from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { socket } from "../socket";
+import { getMessages } from "../api/chat";
+import { getUser } from "../utils/userStorage";
+import { Send, Image, Smile, MoreVertical, ChevronLeft } from "lucide-react";
+import MessageBubble from "../components/message/MessageBubble";
 
+// Types
 interface User {
-  id: string;
+  _id: string;
   name: string;
-  username: string;
   avatar: string;
-  verified: boolean;
   isOnline: boolean;
   lastSeen?: string;
 }
 
 interface Message {
-  id: string;
-  senderId: string;
+  _id: string;
+  senderId: string | User;
   content: string;
-  timestamp: string;
-  isRead: boolean;
-  type: "text" | "image" | "file";
-  reactions?: { emoji: string; users: string[] }[];
+  type: "text" | "image";
+  createdAt: string;
+  status?: "sent" | "delivered" | "read";
 }
 
-interface ChatProps {
-  user: User;
-  onBack?: () => void;
-  isMobile?: boolean;
-  initialMessages?: Message[];
-  onMessageSend?: (message: string) => void;
-}
-
-export default function Chat({
-  user,
-  onBack,
-  isMobile = false,
-  initialMessages = [],
-  onMessageSend,
-}: ChatProps) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [newMessage, setNewMessage] = useState("");
+export default function Chat() {
+  const navigate = useNavigate();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [text, setText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [messageStatus, setMessageStatus] = useState<
-    "sending" | "sent" | "failed" | null
-  >(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [typingUser, setTypingUser] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<any | null>(null);
+
+  const { state } = useLocation();
+  const { conversationId } = useParams();
+  const selectedUser = state?.user as any | undefined;
+  const currentUser: any = getUser();
+
+  // Get sender ID utility
+  const getSenderId = useCallback((sender: string | User) => {
+    return typeof sender === "string" ? sender : sender?._id;
+  }, []);
 
   // Auto-resize textarea
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
-      textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
     }
-  }, [newMessage]);
+  }, [text]);
 
-  // Mock initial messages if none provided
+  // Socket connection
   useEffect(() => {
-    if (initialMessages.length === 0) {
-      const defaultMessages: Message[] = [
-        {
-          id: "1",
-          senderId: user.id,
-          content: "Hey there! How are you doing?",
-          timestamp: "10:30 AM",
-          isRead: true,
-          type: "text",
-        },
-        {
-          id: "2",
-          senderId: "current",
-          content:
-            "I'm doing great! Just finished the project we were talking about.",
-          timestamp: "10:31 AM",
-          isRead: true,
-          type: "text",
-        },
-        {
-          id: "3",
-          senderId: user.id,
-          content: "That's awesome! Can you share the details?",
-          timestamp: "10:32 AM",
-          isRead: true,
-          type: "text",
-        },
-        {
-          id: "4",
-          senderId: "current",
-          content: "Sure! I'll send you the documentation later today.",
-          timestamp: "10:33 AM",
-          isRead: true,
-          type: "text",
-        },
-        {
-          id: "5",
-          senderId: user.id,
-          content: "Perfect! Looking forward to it. 🚀",
-          timestamp: "10:34 AM",
-          isRead: true,
-          type: "text",
-          reactions: [{ emoji: "👍", users: ["current"] }],
-        },
-      ];
-      setMessages(defaultMessages);
+    if (!socket.connected) {
+      socket.connect();
     }
+
+    return () => {
+      socket.off();
+      socket.disconnect();
+    };
   }, []);
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+  // Fetch messages and setup socket events
+  useEffect(() => {
+    if (!conversationId) return;
 
-    const messageContent = newMessage.trim();
-    setNewMessage("");
-    setMessageStatus("sending");
-
-    // Create temporary message (will be replaced with actual response)
-    const tempMessage: Message = {
-      id: `temp-${Date.now()}`,
-      senderId: "current",
-      content: messageContent,
-      timestamp: "Sending...",
-      isRead: false,
-      type: "text",
+    const fetchMessages = async () => {
+      setIsLoading(true);
+      try {
+        const res = await getMessages(conversationId);
+        setMessages(res.data);
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    setMessages((prev) => [...prev, tempMessage]);
+    fetchMessages();
 
-    try {
-      // If custom message handler provided, use it
-      if (onMessageSend) {
-        await onMessageSend(messageContent);
-      }
+    socket.emit("join_conversation", conversationId);
 
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Replace temporary message with confirmed one
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === tempMessage.id
-            ? {
-                ...msg,
-                id: Date.now().toString(),
-                timestamp: new Date().toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-                isRead: true,
-              }
-            : msg
-        )
-      );
-
-      setMessageStatus("sent");
-
-      // Simulate typing indicator and response
+    socket.on("typing", (data: { userId: string }) => {
       setIsTyping(true);
-      setTimeout(() => {
-        setIsTyping(false);
-        const response: Message = {
-          id: (Date.now() + 1).toString(),
-          senderId: user.id,
-          content: getRandomResponse(),
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          isRead: false,
-          type: "text",
-        };
-        setMessages((prev) => [...prev, response]);
-      }, 2000);
-    } catch (error) {
-      // Mark message as failed
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === tempMessage.id
-            ? { ...msg, timestamp: "Failed to send" }
-            : msg
-        )
-      );
-      setMessageStatus("failed");
-      console.error("Failed to send message:", error);
-    }
-  };
+      console.log("typing data", data);
+      setTypingUser(data);
+    });
 
-  const getRandomResponse = () => {
-    const responses = [
-      "That's interesting! Tell me more.",
-      "I see what you mean. 🤔",
-      "Thanks for sharing that!",
-      "That sounds amazing!",
-      "I totally agree with you.",
-      "Let me think about that...",
-      "That's a great point!",
-      "I'm glad you mentioned that.",
-      "Could you elaborate on that?",
-      "That's really helpful, thank you!",
-      "I've been thinking about that too.",
-      "That makes perfect sense.",
-      "Interesting perspective!",
-      "I appreciate you sharing that.",
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
+    socket.on("stop_typing", () => {
+      setIsTyping(false);
+      setTypingUser(null);
+    });
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+    return () => {
+      socket.off("receive_message");
+      socket.off("typing");
+      socket.off("stop_typing");
+    };
+  }, [conversationId]);
 
-  const addReaction = (messageId: string, emoji: string) => {
-    setMessages((prev) =>
-      prev.map((msg) => {
-        if (msg.id === messageId) {
-          const existingReaction = msg.reactions?.find(
-            (r) => r.emoji === emoji
+  useEffect(() => {
+    const handleReceiveMessage = (msg: Message) => {
+      setMessages((prev) => {
+        // 👇 If this is MY message, replace temp message
+        if (getSenderId(msg.senderId) === currentUser._id) {
+          return prev.map((m) =>
+            m._id.startsWith("temp-") ? { ...msg, status: "delivered" } : m
           );
-          if (existingReaction) {
-            // Remove reaction if user already reacted
-            if (existingReaction.users.includes("current")) {
-              const updatedReactions =
-                existingReaction.users.length > 1
-                  ? msg.reactions
-                      ?.map((r) =>
-                        r.emoji === emoji
-                          ? {
-                              ...r,
-                              users: r.users.filter((u) => u !== "current"),
-                            }
-                          : r
-                      )
-                      .filter((r) => r.users.length > 0)
-                  : msg.reactions?.filter((r) => r.emoji !== emoji);
-
-              return {
-                ...msg,
-                reactions: updatedReactions,
-              };
-            } else {
-              // Add user to existing reaction
-              return {
-                ...msg,
-                reactions: msg.reactions?.map((r) =>
-                  r.emoji === emoji
-                    ? { ...r, users: [...r.users, "current"] }
-                    : r
-                ),
-              };
-            }
-          } else {
-            // Add new reaction
-            return {
-              ...msg,
-              reactions: [
-                ...(msg.reactions || []),
-                { emoji, users: ["current"] },
-              ],
-            };
-          }
         }
-        return msg;
-      })
+
+        // 👇 Receiver side: avoid duplicates
+        if (prev.some((m) => m._id === msg._id)) return prev;
+
+        return [...prev, { ...msg, status: "delivered" }];
+      });
+    };
+
+    socket.on("receive_message", handleReceiveMessage);
+
+    return () => {
+      socket.off("receive_message", handleReceiveMessage);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!conversationId) return;
+
+    socket.emit("join_conversation", conversationId);
+
+    return () => {
+      socket.emit("leave_conversation", conversationId);
+    };
+  }, [conversationId]);
+
+  useEffect(() => {
+    const handleReceiveMessage = (msg: Message) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m._id === msg._id)) return prev;
+        return [...prev, { ...msg, status: "delivered" }];
+      });
+    };
+
+    socket.on("receive_message", handleReceiveMessage);
+
+    return () => {
+      socket.off("receive_message", handleReceiveMessage);
+    };
+  }, []);
+
+  // Auto scroll to bottom
+  useEffect(() => {
+    if (!isLoading && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isLoading, isTyping]);
+
+  // Send message
+  const sendMessage = (e?: FormEvent) => {
+    e?.preventDefault();
+    if (!text.trim() || !conversationId || isSending) return;
+
+    const tempId = `temp-${Date.now()}`;
+
+    const optimisticMessage: Message = {
+      _id: tempId,
+      senderId: currentUser._id,
+      content: text.trim(),
+      type: "text",
+      createdAt: new Date().toISOString(),
+      status: "sent",
+    };
+
+    setMessages((prev) => [...prev, optimisticMessage]);
+    setText("");
+    setIsSending(true);
+
+    socket.emit(
+      "send_message",
+      {
+        conversationId,
+        senderId: currentUser._id,
+        content: optimisticMessage.content,
+      },
+      (res: any) => {
+        setIsSending(false);
+
+        if (res?.success) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m._id === tempId ? { ...res.message, status: "delivered" } : m
+            )
+          );
+        }
+      }
     );
   };
 
-  const quickReactions = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
+  // Typing indicator
+  const handleTyping = useCallback(() => {
+    if (!conversationId) return;
 
-  const formatTimestamp = (timestamp: string) => {
-    if (timestamp === "Sending..." || timestamp === "Failed to send") {
-      return timestamp;
-    }
-    return timestamp;
-  };
+    socket.emit("typing", {
+      conversationId,
+      userId: currentUser._id,
+    });
 
-  const handleAttachment = (type: "image" | "file") => {
-    // Simulate file input click
-    const input = document.createElement("input");
-    input.type = "file";
-    if (type === "image") {
-      input.accept = "image/*";
-    } else {
-      input.accept = "*/*";
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
     }
 
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        // Handle file upload logic here
-        console.log("Selected file:", file);
-        // You would typically upload the file and then send a message with the file URL
-      }
-    };
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit("stop_typing", { conversationId });
+    }, 2000);
+  }, [conversationId, currentUser._id]);
 
-    input.click();
-  };
-
-  const retryFailedMessage = (messageId: string) => {
-    const failedMessage = messages.find((msg) => msg.id === messageId);
-    if (failedMessage && failedMessage.timestamp === "Failed to send") {
-      setNewMessage(failedMessage.content);
-      setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
-      setTimeout(() => {
-        textareaRef.current?.focus();
-      }, 100);
-    }
-  };
+  if (!selectedUser) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-linear-to-br from-gray-900 to-black">
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-linear-to-r from-purple-500 to-pink-500 animate-pulse" />
+          <h2 className="text-xl font-semibold text-white">
+            Select a conversation
+          </h2>
+          <p className="text-gray-400 mt-2">Choose someone to start chatting</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-full bg-slate-900/50">
-      {/* Chat Header */}
-      <div className="bg-slate-800/50 backdrop-blur-xl border-b border-purple-500/20 p-4">
+    <div className="flex flex-col  max-h-[calc(100vh-5rem)] bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
+      {/* Header */}
+      <div className="fixed w-full top-20 z-10 bg-gray-900/95 backdrop-blur-md border-b border-gray-700 p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {isMobile && onBack && (
-              <button
-                onClick={onBack}
-                className="text-slate-400 hover:text-white p-2 transition-colors rounded-xl hover:bg-slate-700/50"
-                title="Back to conversations"
-              >
-                ←
-              </button>
-            )}
+          <div className="flex items-center gap-3">
+            <button className=" text-gray-300 hover:text-white">
+              <ChevronLeft className="w-6 h-6" onClick={() => navigate(-1)} />
+            </button>
             <div className="relative">
-              <div className="w-12 h-12 bg-linear-to-r from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center text-white font-bold shadow-lg">
-                {user.avatar}
-              </div>
-              {user.isOnline && (
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-slate-800 rounded-full animate-pulse"></div>
-              )}
+              <img
+                src={selectedUser.avatar}
+                alt={selectedUser.name}
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-purple-500"
+              />
+              <div
+                className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-900 ${
+                  !selectedUser.isOnline ? "bg-green-500" : "bg-gray-500"
+                }`}
+              />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center space-x-2">
-                <h2 className="text-white font-semibold">{user.name}</h2>
-                {user.verified && (
-                  <span className="text-blue-400" title="Verified">
-                    ✓
-                  </span>
+            <div>
+              <h2 className="text-white font-bold">{selectedUser.name}</h2>
+              <div className="flex items-center gap-2">
+                {isTyping && typingUser === selectedUser._id ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm text-purple-400 ml-1">
+                      typing...
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">
+                    {!selectedUser.isOnline ? "Active now" : "recently"}
+                  </p>
                 )}
               </div>
-              <p className="text-slate-400 text-sm">
-                {user.isOnline ? (
-                  <span className="flex items-center space-x-1">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span>Online</span>
-                  </span>
-                ) : (
-                  `Last seen ${user.lastSeen}`
-                )}
-              </p>
             </div>
           </div>
-          <div className="flex items-center space-x-1">
-            <button
-              className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-700/50 transition-all"
-              title="Voice call"
-            >
-              📞
-            </button>
-            <button
-              className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-700/50 transition-all"
-              title="Video call"
-            >
-              🎥
-            </button>
-            <button
-              className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-700/50 transition-all"
-              title="Conversation info"
-            >
-              ⓘ
+
+          <div className="flex items-center gap-4">
+            <button className="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-full transition-colors">
+              <MoreVertical className="w-5 h-5" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Connection Status */}
-      {/* {!isConnected && (
-                <div className="bg-yellow-500/20 text-yellow-200 px-4 py-2 text-sm text-center">
-                    Connection lost. Attempting to reconnect...
-                </div>
-            )} */}
-
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => {
-          const isOwnMessage = message.senderId === "current";
-          const isFailed = message.timestamp === "Failed to send";
-
-          return (
-            <div
-              key={message.id}
-              className={`flex ${
-                isOwnMessage ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`flex space-x-3 max-w-xs lg:max-w-md ${
-                  isOwnMessage ? "flex-row-reverse space-x-reverse" : ""
-                }`}
-              >
-                {/* Avatar - Only show for received messages */}
-                {!isOwnMessage && (
-                  <div className="w-10 h-10 bg-linear-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-lg">
-                    {user.avatar}
-                  </div>
-                )}
-
-                {/* Message Content */}
-                <div className="group relative max-w-full">
-                  <div
-                    className={`rounded-2xl p-4 relative ${
-                      isOwnMessage
-                        ? "bg-linear-to-r from-purple-600 to-pink-600 text-white"
-                        : "bg-slate-800/50 text-white border border-slate-700/50"
-                    } ${isFailed ? "opacity-70" : ""}`}
-                  >
-                    <p className="text-sm leading-relaxed wrap-break-words">
-                      {message.content}
-                    </p>
-                    <div
-                      className={`flex items-center space-x-2 mt-2 ${
-                        isOwnMessage ? "text-purple-200" : "text-slate-400"
-                      }`}
-                    >
-                      <span className="text-xs">
-                        {formatTimestamp(message.timestamp)}
-                      </span>
-                      {isOwnMessage && message.isRead && (
-                        <span className="text-xs">✓✓</span>
-                      )}
-                    </div>
-
-                    {/* Retry button for failed messages */}
-                    {isFailed && (
-                      <button
-                        onClick={() => retryFailedMessage(message.id)}
-                        className="absolute -bottom-2 -right-2 bg-red-500 text-white p-1 rounded-full text-xs hover:bg-red-600 transition-colors"
-                        title="Retry sending"
-                      >
-                        🔄
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Reactions */}
-                  {message.reactions && message.reactions.length > 0 && (
-                    <div
-                      className={`flex space-x-1 mt-2 ${
-                        isOwnMessage ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      {message.reactions.map((reaction, index) => (
-                        <div
-                          key={index}
-                          className={`bg-slate-700/80 backdrop-blur-sm rounded-full px-2 py-1 text-xs flex items-center space-x-1 cursor-pointer hover:bg-slate-600/80 transition-colors ${
-                            reaction.users.includes("current")
-                              ? "ring-1 ring-purple-400"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            addReaction(message.id, reaction.emoji)
-                          }
-                        >
-                          <span>{reaction.emoji}</span>
-                          <span className="text-slate-300">
-                            {reaction.users.length}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Quick Reactions */}
-                  <div
-                    className={`absolute top-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ${
-                      isOwnMessage
-                        ? "left-0 -translate-x-full"
-                        : "right-0 translate-x-full"
-                    } flex bg-slate-800/90 backdrop-blur-sm rounded-2xl p-1 space-x-1 shadow-lg border border-slate-700/50`}
-                  >
-                    {quickReactions.map((emoji) => (
-                      <button
-                        key={emoji}
-                        onClick={() => addReaction(message.id, emoji)}
-                        className="w-8 h-8 hover:bg-slate-700/50 rounded-xl transition-all transform hover:scale-110 active:scale-95"
-                        title={`Add ${emoji} reaction`}
-                      >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Typing Indicator */}
-        {isTyping && (
-          <div className="flex justify-start animate-fade-in">
-            <div className="flex space-x-3 max-w-xs lg:max-w-md">
-              <div className="w-10 h-10 bg-linear-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-lg">
-                {user.avatar}
-              </div>
-              <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                </div>
-              </div>
+      {/* Messages Container */}
+      <div
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth max-h-full mt-20"
+      >
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-linear-to-r from-purple-500 to-pink-500 animate-spin" />
+              <p className="text-gray-400">Loading messages...</p>
             </div>
           </div>
-        )}
+        ) : messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-screen text-center px-4">
+            <div className="w-24 h-24 rounded-full bg-linear-to-r from-purple-500/20 to-pink-500/20 mb-6 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                <Send className="w-8 h-8 text-white" />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">
+              Start a conversation
+            </h3>
+            <p className="text-gray-400 max-w-md">
+              Send your first message to {selectedUser.name} and start chatting
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="text-center my-6">
+              <span className="text-xs text-gray-500 bg-gray-900 px-4 py-2 rounded-full">
+                Today
+              </span>
+            </div>
+            {messages.map((msg, index) => {
+              const isMine = getSenderId(msg.senderId) === currentUser._id;
+              const prevMessage = messages[index - 1];
+              const showAvatar =
+                !prevMessage ||
+                getSenderId(prevMessage.senderId) !==
+                  getSenderId(msg.senderId) ||
+                new Date(msg.createdAt).getTime() -
+                  new Date(prevMessage.createdAt).getTime() >
+                  300000; // 5 minutes
+              const showStatus = !isMine || index === messages.length - 1;
 
-        <div ref={messagesEndRef} />
+              return (
+                <div key={msg._id} className="animate-fadeIn">
+                  <MessageBubble
+                    message={msg}
+                    isMine={isMine}
+                    showAvatar={!isMine && showAvatar}
+                    showStatus={showStatus}
+                    selectedUser={selectedUser}
+                  />
+                </div>
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </>
+        )}
       </div>
 
-      {/* Message Input */}
-      <div className="bg-slate-800/50 backdrop-blur-xl border-t border-purple-500/20 p-4">
-        <div className="flex items-end space-x-3">
-          <div className="flex space-x-1">
-            <button
-              onClick={() => handleAttachment("image")}
-              className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-700/50 transition-all"
-              title="Attach image"
-            >
-              📷
-            </button>
-            <button
-              onClick={() => handleAttachment("file")}
-              className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-700/50 transition-all"
-              title="Attach file"
-            >
-              📎
-            </button>
-            <button
-              className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-700/50 transition-all"
-              title="Add emoji"
-            >
-              😊
-            </button>
-          </div>
+      {/* Input Area */}
+      <div className="sticky bottom-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-700 p-4">
+        <form onSubmit={sendMessage} className="flex items-center gap-2">
+          <button
+            type="button"
+            className="p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full transition-colors"
+          >
+            <Image className="w-5 h-5" />
+          </button>
+
+          <button
+            type="button"
+            className="p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full transition-colors"
+          >
+            <Smile className="w-5 h-5" />
+          </button>
+
           <div className="flex-1 relative">
             <textarea
               ref={textareaRef}
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type a message..."
-              className="w-full bg-slate-700/50 border border-slate-600 rounded-2xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none transition-all"
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+                handleTyping();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
+              placeholder="Message..."
+              className="w-full bg-gray-800 text-white placeholder-gray-400 rounded-2xl px-4 py-3 pr-12 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent max-h-32"
               rows={1}
-              style={{ minHeight: "44px" }}
             />
-            {messageStatus === "sending" && (
-              <div className="absolute right-3 top-3 w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-            )}
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+              <button
+                type="submit"
+                disabled={!text.trim() || isSending}
+                className={`
+                  p-2 rounded-full transition-all duration-300
+                  ${
+                    text.trim()
+                      ? "bg-linear-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:scale-105"
+                      : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                  }
+                `}
+              >
+                {isSending ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleSendMessage}
-            disabled={!newMessage.trim() || messageStatus === "sending"}
-            className="bg-linear-to-r from-purple-600 to-pink-600 text-white p-3 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-105 disabled:hover:scale-100"
-            title="Send message"
-          >
-            {messageStatus === "sending" ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              "➤"
-            )}
-          </button>
-        </div>
+        </form>
       </div>
     </div>
   );
